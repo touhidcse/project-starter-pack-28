@@ -3,53 +3,64 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import jwt, { JwtPayload } from "jsonwebtoken"
 
-type LoginState= {
+type LoginState = {
     success: true,
     statusCode: number,
     message: string,
-    data:{
+    data: {
         accessToken: string,
         refreshToken: string
     }
 }
 
-export const loginAction = async (prevState: LoginState,formdata: FormData)=>{
-    console.log("formdata from authAction/loginAction",formdata);
-    console.log("PrevState authActin/loginAction",prevState);
-    const email= formdata.get("email");
+export const loginAction = async (prevState: LoginState, formdata: FormData) => {
+    console.log("formdata from authAction/loginAction", formdata);
+    console.log("PrevState authActin/loginAction", prevState);
+    const email = formdata.get("email");
     const password = formdata.get("password");
     const payload = {
         email,
         password
     }
 
-    const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/login`,{
+    const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body:JSON.stringify(payload)
+        body: JSON.stringify(payload)
     });
 
     const result = await res.json()
-    
-    if(result.success){
+
+    if (result.success) {
         const cookieStore = await cookies()
 
-        cookieStore.set("accessToken",result.data.accessToken,{
+        cookieStore.set("accessToken", result.data.accessToken, {
             httpOnly: true,
-            maxAge: 60*60*24,
-            sameSite:"lax"
+            maxAge: 60 * 60 * 24,
+            sameSite: "lax"
         })
-        cookieStore.set("refreshToken",result.data.refreshToken,{
+        cookieStore.set("refreshToken", result.data.refreshToken, {
             httpOnly: true,
-            maxAge: 60*60*24*7,
-            sameSite:"lax"
-        })
+            maxAge: 60 * 60 * 24 * 7,
+            sameSite: "lax"
+        });
 
-        redirect("/dashboard")
+        // Role base redirect
+        const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
+        console.log("Decoded Token:", decodedToken);
+        if (decodedToken.role === "USER") {
+            redirect("/dashboard")
+        } else if (decodedToken.role === "ADMIN") {
+            redirect("/admin-dashboard")
+        } else if (decodedToken.role === "AUTHOR") {
+            redirect("/author-dashboard")
+        }
+
     }
 
-    return result ;
+    return result;
 }
