@@ -10,7 +10,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const user = await getMe() 
+  // const user = await getMe() 
   return (
     <html
       lang="en"
