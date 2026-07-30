@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { LogOut, Settings, User, Menu } from 'lucide-react'
+import { LogOut, Settings, User, Menu, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -16,6 +16,7 @@ import { logout } from '@/service/logout'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { NavbarProps } from '@/lib/types'
 
 
 // Navigation items configuration
@@ -30,48 +31,33 @@ const navItems = [
 
 // User dropdown menu items
 const userMenuItems = [
+    {label: 'Dashboard', icon: LayoutDashboard, action: 'dashboard'},
     { label: 'Profile', icon: User, action: 'profile' },
     { label: 'Settings', icon: Settings, action: 'settings' },
 ]
 
-type Iuser = {
-    success: boolean,
-    message: string,
-    data: {
-        profile: {
-            id: string,
-            name: string,
-            email: string,
-            activeStatus: string,
-            role: string,
-            createdAt: string,
-            updatedAt: string,
-            profile: {
-                id: string,
-                profilePhoto: string,
-                bio: string,
-                userId: string,
-                createdAt: string,
-                updatedAt: string
-            }
-        }
-    }
 
-
-}
-type NavbarProps = {
-    user: Iuser
-}
 
 
 export function Navbar({ user }: NavbarProps) {
 
-    console.log(user.success,"Success");
+    console.log(user.success,"Success from Navbar");
     const router = useRouter()
 
     const handleUserMenuAction = async (action: string) => {
         console.log(`User clicked: ${action}`)
         // Add your action logic here
+        if(action === "dashboard"){
+            if(user.data.profile.role === "USER"){
+                router.push("/dashboard")   
+            } else if(user.data.profile.role === "AUTHOR"){
+                router.push("/author-dashboard")
+            } else if(user.data.profile.role === "ADMIN"){
+                router.push("/admin-dashboard")
+            }
+            return;
+        }
+
         if (action === "logout") {
             await logout();
             toast.success("User Logged out Successfully");

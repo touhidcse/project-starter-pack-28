@@ -11,6 +11,7 @@ import { IPost } from "@/lib/types";
 import { PencilIcon, PlusIcon } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { createPost, updatePost } from "../_actions/myPostAction";
 
 type PostFormDialogProps = {
     mode: "create" | "edit";
@@ -21,8 +22,8 @@ export function PostFormDialog({ mode, post }: PostFormDialogProps) {
     const [open, setOpen] = useState(false);
 
     const action = mode === "edit" && post
-        ? () =>{}
-        : () => {};
+        ? updatePost.bind(null,post.id,post.authorId)
+        : createPost;
 
     const [state, formAction, pending] = useActionState(action, null) as any;
 
@@ -94,6 +95,10 @@ export function PostFormDialog({ mode, post }: PostFormDialogProps) {
                             placeholder="tech, sports"
                         />
                     </div>
+                    <Label className="flex items-center gap-2">
+                        <Checkbox name="isFeatured" defaultChecked={post?.isFeatured} />
+                        Mark as featured content
+                    </Label>
                     <Label className="flex items-center gap-2">
                         <Checkbox name="isPremium" defaultChecked={post?.isPremium} />
                         Mark as premium content

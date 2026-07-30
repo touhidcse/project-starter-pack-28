@@ -5,10 +5,15 @@ import { Card } from '@/components/ui/card'
 import React, { useActionState, useEffect } from 'react'
 import { loginAction } from '../_actions/authActions'
 import { toast } from 'sonner'
+import { useSearchParams } from 'next/navigation'
 // import { useRouter } from 'next/navigation'  // client side navigation
 
 const LoginForm = () => {
-    const [state, action, pending] =useActionState(loginAction,false)
+    const searchParams = useSearchParams()
+    const redirectto = searchParams.get("redirectTo") ?? "";
+    const [state, action, pending] =useActionState(loginAction.bind(null, redirectto),false)
+
+    
     // const router = useRouter()
     console.log("state from login form",state);
     useEffect(()=>{

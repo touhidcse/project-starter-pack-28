@@ -15,7 +15,7 @@ type LoginState = {
     }
 }
 
-export const loginAction = async (prevState: LoginState, formdata: FormData) => {
+export const loginAction = async (redirectTo : string,prevState: LoginState, formdata: FormData) => {
     console.log("formdata from authAction/loginAction", formdata);
     console.log("PrevState authActin/loginAction", prevState);
     const email = formdata.get("email");
@@ -52,6 +52,9 @@ export const loginAction = async (prevState: LoginState, formdata: FormData) => 
         // Role base redirect
         const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
         console.log("Decoded Token:", decodedToken);
+        if(redirectTo && typeof redirectTo === "string" && redirectTo.startsWith("/") && !redirectTo.startsWith("//")){
+            redirect(redirectTo)
+        }
         if (decodedToken.role === "USER") {
             redirect("/dashboard")
         } else if (decodedToken.role === "ADMIN") {
